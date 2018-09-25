@@ -1,12 +1,13 @@
 from django.shortcuts import render, get_object_or_404, redirect
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
-from django.views.generic import ListView
-from django.core.mail import send_mail
 from django.db.models import Count
+from django.shortcuts import render, get_object_or_404, redirect
 from django.utils import timezone
 from taggit.models import Tag
-from .models import Post, Comment
 from .forms import EmailPostForm, CommentForm, PostForm
+from .models import Post
+from django.views.generic import ListView
+from django.core.mail import send_mail
 
 def post_list(request, tag_slug=None):
     object_list = Post.published.all()
@@ -32,18 +33,13 @@ def post_list(request, tag_slug=None):
                   {'page': page,
                    'posts': posts,
                    'tag': tag})
-def post_new(request):
-     if request.method == "POST":
-        form = PostForm(request.POST)
-        if form.is_valid():
-            post = form.save(commit=False)
-            post.author = request.user
-            post.published_date = timezone.now()
-            post.save()
-        return redirect('post_detail', pk=post.pk)
-     else:
-       form = PostForm()
-     return render(request, 'blog/post_edit.html', {'form': form})
+
+class PostListView(ListView):
+    queryset = Post.published.all()
+    context_object_name = 'posts'
+    paginate_by = 3
+    template_name = 'blog/post/list.html'
+
 
 def post_edit(request, pk):
     post = get_object_or_404(Post, pk=pk)
