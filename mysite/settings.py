@@ -75,17 +75,23 @@ WSGI_APPLICATION = 'mysite.wsgi.application'
 
 DATABASES = {
     'default': {
-        #'ENGINE': 'django.db.backends.sqlite3',
-        #'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
         'ENGINE': 'django.db.backends.postgresql',
-        'NAME': 'YOUR DB NAME',
-        'USER': 'YOUR DB USER',
-        'PASSWORD': 'YOUR DB PW',
-        'HOST': 'YOUR DB HOST',
+        'NAME': 'd1ju7pjkem84ir',
+        'USER': 'yydqklsnrrnmsi',
+        'PASSWORD': 'b6f97899ede69ebd83cfc767bd81f430b73236dbf724e309f8b880f29883dbc6',
+        'HOST': 'ec2-54-235-86-226.compute-1.amazonaws.com',
         'PORT': '5432',
-    }
-}
+               }
+            }
 
+try:
+    from local_settings import *
+except ImportError:
+    # Update database configuration with $DATABASE_URL.
+    db_from_env = dj_database_url.config(conn_max_age=500)
+    DATABASES['default'].update(db_from_env)
+    DATABASES['default'] = dj_database_url.config()
+    pass
 
 # Password validation
 # https://docs.djangoproject.com/en/2.0/ref/settings/#auth-password-validators
@@ -120,6 +126,8 @@ USE_L10N = True
 USE_TZ = True
 
 
+
+
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/2.0/howto/static-files/
 PROJECT_ROOT = os.path.dirname(os.path.abspath(__file__))
@@ -131,10 +139,6 @@ STATICFILES_DIRS = (
     os.path.join(PROJECT_ROOT, 'static'),
 )
 
-# Update database configuration with $DATABASE_URL.
-db_from_env = dj_database_url.config(conn_max_age=500)
-DATABASES['default'].update(db_from_env)
-DATABASES['default'] = dj_database_url.config()
 
 # Simplified static file serving.
 # https://warehouse.python.org/project/whitenoise/
@@ -142,16 +146,15 @@ DATABASES['default'] = dj_database_url.config()
 #STATICFILES_STORAGE = 'whitenoise.django.GzipManifestStaticFilesStorage'
 STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 
-SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
+#SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
 
-EMAIL_HOST = 'smtp.mailtrap.io'
-EMAIL_HOST_USER = 'YOUR HOST USER'
-EMAIL_HOST_PASSWORD = 'YOUR HOST PASSWORD'
-EMAIL_PORT = 2525
-#EMAIL_USE_TLS = True
+EMAIL_HOST = 'smtp.gmail.com'
+EMAIL_HOST_USER = 'babonaresh@gmail.com'
+EMAIL_HOST_PASSWORD = 'naresh@004'
+#EMAIL_PORT = 2525
+EMAIL_PORT = 587
+EMAIL_USE_TLS = True
+DEFAULT_FROM_EMAIL = EMAIL_HOST_USER
 
 
-try:
-    from .local_settings import *
-except ImportError:
-    pass
+
