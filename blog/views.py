@@ -7,14 +7,61 @@ from .forms import EmailPostForm, CommentForm, PostForm
 from .models import Post
 from django.views.generic import ListView
 from django.core.mail import send_mail
+from django.contrib.auth.decorators import login_required
+
+from ibm_watson.tone_analyzer_v3 import ToneInput
+import requests
+import json
+from ibm_watson import ToneAnalyzerV3
+from ibm_watson.tone_analyzer_v3 import ToneInput
+from ibm_watson import LanguageTranslatorV3
+
+language_translator = LanguageTranslatorV3(
+    version='2018-05-01',
+    iam_apikey='pnfzBR-yllY5eRIvXHjV1aM3ClvHlCAIe_7GdAmZwdFF')
+
+tone_analyzer = ToneAnalyzerV3(
+    version='2017-09-21',
+    iam_apikey='zUq8VmS5pGghqI8TaNIMIm-D-q_gCvCzJ9G2-z2LQh9C',
+    # url='https://gateway.watsonplatform.net/tone-analyzer/api'
+)
 
 def post_list(request, tag_slug=None):
     object_list = Post.published.all()
     tag = None
 
+    kk = Post.objects.filter(publish__lte=timezone.now()).order_by('publish')
+
+    for post in kk:
+        posting = post.body
+        translation = language_translator.translate(
+            text=post.body, model_id='en-es').get_result()
+        obj = (json.dumps(translation, indent=2, ensure_ascii=False))
+        #print(obj)
+        obj2 = json.loads(obj)
+        post.obj2 = obj2['translations'][0]['translation']
+        post.w_count = obj2['word_count']
+        post.c_count = obj2['character_count']
+        print("post.w_count",post.w_count)
+        print("post.c_count", post.c_count)
+        tone_input = ToneInput(post.body)
+        try:
+            tone = tone_analyzer.tone(tone_input=tone_input, content_type="application/json").get_result()
+            jsonText = (json.dumps(tone, indent=2, ensure_ascii=False))
+            jsonParse = json.loads(jsonText)
+            post.Score1 = jsonParse['document_tone']['tones'][0]['score']
+            post.ToneName1 = jsonParse['document_tone']['tones'][0]['tone_name']
+        except:
+            pass
+            post.Score1 = "no-data value for key Score from API response"
+            post.ToneName1 = "no-data value for key ToneName from API response"
+            print("OOPS! Something went wrong while rendering the Document tone json")
+        print("Score",post.Score1)
+        print("tone",post.ToneName1)
+
     if tag_slug:
-        tag = get_object_or_404(Tag, slug=tag_slug)
-        object_list = object_list.filter(tags__in=[tag])
+         tag = get_object_or_404(Tag, slug=tag_slug)
+         object_list = object_list.filter(tags__in=[tag])
 
     paginator = Paginator(object_list, 3)  # 3 posts in each page
     page = request.GET.get('page')
@@ -30,7 +77,7 @@ def post_list(request, tag_slug=None):
     return render(request,
                   'blog/post_list.html',
                   {'page': page,
-                   'posts': posts,
+                   'posts': kk,
                    'tag': tag})
 
 class PostListView(ListView):
@@ -39,7 +86,7 @@ class PostListView(ListView):
     paginate_by = 3
     template_name = 'blog/post_list.html'
 
-
+@login_required()
 def post_edit(request, pk):
     post = get_object_or_404(Post, pk=pk)
     if request.method == "POST":
@@ -49,7 +96,7 @@ def post_edit(request, pk):
             post.author = request.user
             post.published_date = timezone.now()
             post.save()
-            return redirect('post_detail', pk=post.pk)
+            return redirect('blog:post_list' )
     else:
         form = PostForm(instance=post)
     return render(request, 'blog/post_edit.html', {'form': form})
@@ -117,3 +164,17 @@ def post_detail(request, year, month, day, post):
                    'new_comment': new_comment,
                    'comment_form': comment_form,
                    'similar_posts': similar_posts})
+
+@login_required()
+def post_new(request):
+    if request.method == "POST":
+        form = PostForm(request.POST)
+        if form.is_valid():
+            post = form.save(commit=False)
+            post.author = request.user
+            post.published_date = timezone.now()
+            post.save()
+            return redirect('blog:post_list')
+    else:
+        form = PostForm()
+    return render(request, 'blog/post_edit.html', {'form': form})

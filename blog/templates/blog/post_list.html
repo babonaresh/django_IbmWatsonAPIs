@@ -8,11 +8,24 @@
     <h2>Posts tagged with "{{ tag.name }}"</h2>
   {% endif %}
   {% for post in posts %}
+      <div class="post">
+
     <h2>
       <a href="{{ post.get_absolute_url }}">
         {{ post.title }}
       </a>
     </h2>
+      {{ post.body|truncatewords:30|linebreaks }}
+      <span style="background-color:yellow">Watson Says:</span>
+           <p>Translation: {{ post.obj2}}</p>
+           <p>Word Count: {{ post.w_count}} |
+           Letter Count: {{ post.c_count}}</p>
+           <p> <strong> <u>Tone Analyzer Name: </u>{{ post.ToneName1}} <br> </strong> </p>
+           <p> <strong> <u>Tone Analyzer Score: </u> {{ post.Score1}} <br> </strong> </p>
+
+
+
+           	</p>
       <p class="tags">
       Tags:
       {% for tag in post.tags.all %}
@@ -25,7 +38,8 @@
     <p class="date">
       Published {{ post.publish }} by {{ post.author }}
     </p>
-    {{ post.body|truncatewords:30|linebreaks }}
+      </div>
   {% endfor %}
   {% include "pagination.html" with page=posts %}
+
 {% endblock %}

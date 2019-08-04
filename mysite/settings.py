@@ -77,10 +77,10 @@ WSGI_APPLICATION = 'mysite.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
-        'NAME': 'd1ju7pjkem84ir',
-        'USER': 'yydqklsnrrnmsi',
-        'PASSWORD': 'b6f97899ede69ebd83cfc767bd81f430b73236dbf724e309f8b880f29883dbc6',
-        'HOST': 'ec2-54-235-86-226.compute-1.amazonaws.com',
+        'NAME': 'd66hooqgo9rl1m',
+        'USER': 'hyobopyhmnuncj',
+        'PASSWORD': '9d1c7428b62bdd2d52ec8fff7df583e4be75b72ba914a25148af62a6a7453678',
+        'HOST': 'ec2-54-204-35-248.compute-1.amazonaws.com',
         'PORT': '5432',
                }
             }
@@ -150,12 +150,15 @@ STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 #SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
 
 EMAIL_HOST = 'smtp.gmail.com'
-EMAIL_HOST_USER = 'babonaresh@gmail.com'
-EMAIL_HOST_PASSWORD = '*********'
+EMAIL_HOST_USER = 'mytrip.plannerapp'
+EMAIL_HOST_PASSWORD = 'isqa8380t4'
 #EMAIL_PORT = 2525
 EMAIL_PORT = 587
 EMAIL_USE_TLS = True
 DEFAULT_FROM_EMAIL = EMAIL_HOST_USER
 
 
-
+try:
+    from .local_settings import *
+except ImportError:
+    pass
